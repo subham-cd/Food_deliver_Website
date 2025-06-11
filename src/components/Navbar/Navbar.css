@@ -1,0 +1,78 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&family=Poppins:ital,wght@0,400;1,700&family=Roboto+Slab:wght@100..900&family=Roboto:ital,wght@0,100..900;1,100..900&family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&family=Varela+Round&display=swap');
+
+*{
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+   font-family: "Poppins", sans-serif;
+
+}
+body{
+  min-height: 100vh;
+
+}
+a{
+  text-decoration: none;
+  color: inherit;
+}
+.app{
+  width: 80%;
+  margin: auto;
+}
+.navbar{
+  padding: 20px 0px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.navbar .logo{
+  width: 150px;
+}
+.navbar-menu{
+  display: flex;
+  list-style: none;
+  gap: 20px;
+  color: #435592;
+  font-size: 18px;
+}
+.navbar-right{
+  display: flex;
+  align-items: center;
+  gap: 40px;
+
+}
+.navbar button{
+  background: transparent;
+  font-size: 16px;
+    color: #435592;
+    border: 1px solid tomato;
+    padding: 10px 30px;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: 0.2sec;
+
+}
+.navbar button:hover{
+  background-color: #fff4f2;
+}
+.navbar .active{
+  padding-bottom: 2px;
+  border-bottom: 2px solid #435592;
+}
+.navbar li{
+  cursor: pointer;
+}
+.navbar-search-icon{
+    position: relative;
+
+}
+.navbar-search-icon .dot{
+    position: absolute;
+    min-width: 10px;
+    min-height: 10px;
+    background-color: tomato;
+    border-radius: 50%;
+    top: -8px;
+    right: -8px;
+}
