@@ -1,30 +1,32 @@
 import axios from "axios";
 import { createContext, useEffect, useState } from "react";
-import { data } from "react-router-dom";
-// import { food_list } from "../assets/assets";
 
 export const StoreContext = createContext(null);
 
 const StoreContextProvider = (props) => {
   const [cartItems, setCartItems] = useState({});
   const [token, setToken] = useState("");
-  const [food_list,setFoodList]= useState([])
+  const [food_list, setFoodList] = useState([]);
 
   const url = "http://localhost:4000";
 
-  // ✅ Load token from localStorage on initial load
+  // ✅ Load token and fetch data on initial load
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
-    async function loadData() {
+
+    const loadData = async () => {
       await fetchFoodList();
-       if (storedToken) {
-      setToken(storedToken);
-    }
-    }
+
+      if (storedToken) {
+        setToken(storedToken); // for future updates
+        await loadCartData(storedToken); // use directly
+      }
+    };
+
     loadData();
   }, []);
 
-  // ✅ Save token to localStorage whenever it changes
+  // ✅ Save token to localStorage on changes
   useEffect(() => {
     if (token) {
       localStorage.setItem("token", token);
@@ -33,18 +35,44 @@ const StoreContextProvider = (props) => {
     }
   }, [token]);
 
-  const addToCart = (itemId) => {
-    if (!cartItems[itemId]) {
-      setCartItems((prev) => ({ ...prev, [itemId]: 1 }));
-    } else {
-      setCartItems((prev) => ({ ...prev, [itemId]: prev[itemId] + 1 }));
+  // ✅ Add to cart logic
+  const addToCart = async (itemId) => {
+    setCartItems((prev) => ({
+      ...prev,
+      [itemId]: (prev[itemId] || 0) + 1,
+    }));
+
+    if (token) {
+      await axios.post(
+        url + "/api/cart/add",
+        { itemId },
+        { headers: { token } }
+      );
     }
   };
 
-  const removeFromCart = (itemId) => {
-    setCartItems((prev) => ({ ...prev, [itemId]: prev[itemId] - 1 }));
+  // ✅ Remove from cart logic
+  const removeFromCart = async (itemId) => {
+    setCartItems((prev) => {
+      const updatedCart = { ...prev };
+      if (updatedCart[itemId] === 1) {
+        delete updatedCart[itemId];
+      } else {
+        updatedCart[itemId] -= 1;
+      }
+      return updatedCart;
+    });
+
+    if (token) {
+      await axios.post(
+        url + "/api/cart/remove",
+        { itemId },
+        { headers: { token } }
+      );
+    }
   };
 
+  // ✅ Total cart amount
   const getTotalCartAmount = () => {
     let totalAmount = 0;
     for (const item in cartItems) {
@@ -57,19 +85,40 @@ const StoreContextProvider = (props) => {
     }
     return totalAmount;
   };
- const fetchFoodList = async () => {
-  try {
-    const response = await axios.get(url + "/api/food/list");
-    console.log("🍽️ Backend Response:", response.data); // add this
-    if (response.data.success) {
-      setFoodList(response.data.data); // ✅ set only if success
-    } else {
-      console.warn("⚠️ Food list fetch failed:", response.data.message);
+
+  // ✅ Food list fetch
+  const fetchFoodList = async () => {
+    try {
+      const response = await axios.get(url + "/api/food/list");
+      if (response.data.success) {
+        setFoodList(response.data.data);
+      } else {
+        console.warn("⚠️ Food list fetch failed:", response.data.message);
+      }
+    } catch (err) {
+      console.error("❌ Error fetching food list", err);
     }
-  } catch (err) {
-    console.error("❌ Error fetching food list", err);
-  }
-};
+  };
+
+  // ✅ Load cart data
+  const loadCartData = async (tokenParam) => {
+    try {
+      const response = await axios.post(
+        url + "/api/cart/get",
+        {},
+        { headers: { token: tokenParam } }
+      );
+
+      if (response.data.success) {
+        setCartItems(response.data.cartData);
+      } else {
+        console.warn("⚠️ Failed to load cart:", response.data.message);
+      }
+    } catch (err) {
+      console.error("❌ Error loading cart data", err);
+    }
+  };
+
   const contextValue = {
     food_list,
     cartItems,
